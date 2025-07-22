@@ -1,0 +1,32 @@
+
+version: "3.9"
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: scorm
+      POSTGRES_PASSWORD: scormpass
+      POSTGRES_DB: scormdb
+    ports: ["5432:5432"]
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+  minio:
+    image: minio/minio
+    command: gateway gcs
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    ports: ["9000:9000"]
+  app:
+    build: .
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_MODE: ${MINIO_MODE}
+      API_KEY_SECRET: ${API_KEY_SECRET}
+    ports: ["8000:8000"]
+    depends_on: [db, redis, minio]
